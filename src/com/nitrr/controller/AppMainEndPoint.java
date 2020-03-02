@@ -6,10 +6,13 @@ import java.util.List;
 import java.util.Map;
 
 import javax.websocket.OnClose;
+import javax.websocket.OnError;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
+
+import org.json.JSONObject;
 
 import com.google.gson.Gson;
 import com.nitrr.constants.Constants;
@@ -19,12 +22,15 @@ import com.nitrr.model.dto.CustomRequest;
 @ServerEndpoint("/auth/end")
 public class AppMainEndPoint {
 	
-	
+	// Static Live In memory data
 	private static List<Session> clients = new ArrayList<Session>();
 	private static Map<String, Session> senders = new HashMap<String, Session>();
 	private static Map<String, Session> receivers = new HashMap<String, Session>();
 	private static Map<Session, String> maps = new HashMap<Session, String>();
-
+	private static Thread conThread;
+	
+	private JSONObject greeting = new JSONObject();
+	
 	@OnMessage
 	public void onMessage(Session session,String msg) {
 		
@@ -41,8 +47,15 @@ public class AppMainEndPoint {
 	
 	@OnOpen
 	public void onOpen(Session session) {
-		System.out.println("New client connected "+session.getId());
-		clients.add(session);
+		try {
+			System.out.println("New client connected "+session.getId());
+			clients.add(session);
+			greeting.put("Success", "Welcome Real time monitoring");
+			sendMessage(greeting.toString(),session);
+		}catch(Exception e) {
+			e.printStackTrace(System.out);
+		}
+		
 	}
 	@OnClose
 	public void closedConnection(Session session) {
@@ -60,7 +73,10 @@ public class AppMainEndPoint {
 			e.printStackTrace();
 		}
 	}
-	
+    @OnError
+    public void onError(Throwable t) {
+        System.out.println("onError::" + t.getMessage());
+    }
 	
 	public void onUnregisterReceiver(Session session) {
 		try {
@@ -144,11 +160,60 @@ public class AppMainEndPoint {
 		case Constants.REQUEST_UNREGISTER_SENDER:
 			this.onUnregistredSender(session, request.getId());
 			break;
+		case Constants.TEST_TRANMISSION:
+			relay(request);
+			break;
 		default:
 			break;
 			
 		}
 	}
+	protected void relay(CustomRequest request) {
+		if(receivers.containsKey(request.getId())){
+			relay(receivers.get(request.getId()), request.getData(), request.getId());
+		}
+	}
+	protected void relay(Session receiver, JSONObject data, String id) {
+		CustomRequest request = new CustomRequest(id, Constants.TEST_TRANMISSION);
+		request.setData(data);
+		Gson gsn = new Gson();
+		sendMessage(gsn.toJson(request),receiver);
+	}
 	
+	private void sendMessage(String msg, Session session) {
+		try {
+			if(session.isOpen()) {
+				session.getBasicRemote().sendText(msg);
+				session.getBasicRemote().sendText("Text from server to "+session.getId());
+			}
+			else {
+				System.out.println("Connection close");
+			}
+		}catch(Exception e) {
+			e.printStackTrace(System.out);
+		}
+	}
+	/**
+	 * Live Thread
+	 */
 	
+	static {
+		conThread=new Thread() {
+			public void run() {
+				while(true) {
+					if(clients!=null) {
+						// Do Nothing
+						System.out.println("Socket working...");
+						try {
+							Thread.sleep(1000);
+						}catch(Exception e) {
+							System.out.println(""+e.toString());
+						}
+						
+					}
+				}
+			}
+		};
+		conThread.start();
+	}
 }
