@@ -101,6 +101,7 @@ public class AppMainEndPoint {
 		try {
 			maps.put(session, id);
 			senders.put(id, session);
+			System.out.println("Sender has been registred "+senders);
 		}catch(Exception e) {
 			System.out.println(e.toString());
 		}
@@ -109,7 +110,8 @@ public class AppMainEndPoint {
 	public void onRegistredReceiver(Session session, String id) {
 		try {
 			maps.put(session, id);
-			senders.put(id, session);
+			receivers.put(id, session);
+			System.out.println("receiver has been registred  "+receivers);
 		}catch(Exception e) {
 			System.out.println(e.toString());
 		}
@@ -178,6 +180,7 @@ public class AppMainEndPoint {
 		request.setData(data);
 		Gson gsn = new Gson();
 		sendMessage(gsn.toJson(request),receiver);
+		
 	}
 	
 	private void sendMessage(String msg, Session session) {
