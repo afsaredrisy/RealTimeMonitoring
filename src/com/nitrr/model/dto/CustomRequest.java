@@ -6,7 +6,7 @@ public class CustomRequest {
 	
 	private String id;
 	private int requestType;
-	private JSONObject data = new JSONObject();;
+	private String data = "";
 	public CustomRequest(String id, int requestType) {
 		super();
 		this.id = id;
@@ -24,10 +24,10 @@ public class CustomRequest {
 	public void setRequestType(int requestType) {
 		this.requestType = requestType;
 	}
-	public JSONObject getData() {
+	public String getData() {
 		return data;
 	}
-	public void setData(JSONObject data) {
+	public void setData(String data) {
 		this.data = data;
 	}
 	@Override

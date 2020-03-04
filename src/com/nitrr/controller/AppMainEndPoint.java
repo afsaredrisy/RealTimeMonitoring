@@ -172,10 +172,12 @@ public class AppMainEndPoint {
 	}
 	protected void relay(CustomRequest request) {
 		if(receivers.containsKey(request.getId())){
-			relay(receivers.get(request.getId()), request.getData(), request.getId());
+			Gson gsn = new Gson();
+			sendMessage(gsn.toJson(request),receivers.get(request.getId()));
+			//relay(receivers.get(request.getId()), request.getData(), request.getId());
 		}
 	}
-	protected void relay(Session receiver, JSONObject data, String id) {
+	protected void relay(Session receiver, String data, String id) {
 		CustomRequest request = new CustomRequest(id, Constants.TEST_TRANMISSION);
 		request.setData(data);
 		Gson gsn = new Gson();
