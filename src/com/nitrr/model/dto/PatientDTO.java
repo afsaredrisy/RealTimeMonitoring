@@ -1,5 +1,7 @@
 package com.nitrr.model.dto;
 
+import com.nitrr.model.Patient;
+
 public class PatientDTO {
 	
 	private String name;
@@ -67,5 +69,8 @@ public class PatientDTO {
 	public String toString() {
 		return "{name=" + name + ", age=" + age + ", height=" + height + ", gender=" + gender + ", weight="
 				+ weight + ", history=" + history + ", region=" + region + "}";
+	}
+	public Patient getPatient(String _id) {
+		return new Patient(_id,name, age, height,  gender,  weight,  history,  region);
 	}
 }
