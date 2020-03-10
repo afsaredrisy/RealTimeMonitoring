@@ -107,7 +107,7 @@ To use ECG wave you will get a JSON object in following format which you can par
 {
 	"id":"556433",
 	"requestType":4
-	"data" : "{
+	"data":"{
 		\"ecg\": 98,
 		\"logical_timestamp\": 5345665256,
 		\"physical_timestamp\": \"10 March 2019: 20:18:23\"
