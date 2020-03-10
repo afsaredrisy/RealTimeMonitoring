@@ -156,7 +156,7 @@ public class CustomRequest {
 
 ```
 
-Here is parse.
+Here is parser.
 ```java
 
 public class RemoteDataParser {
