@@ -106,7 +106,7 @@ To use ECG wave you will get a JSON object in following format which you can par
 ```JSON
 {
 	"id":"556433",
-	"requestType":4
+	"requestType":4,
 	"data":"{
 		\"ecg\": 98,
 		\"logical_timestamp\": 5345665256,
@@ -114,8 +114,6 @@ To use ECG wave you will get a JSON object in following format which you can par
 	}"
 
 }
-
-{"id":"556433","requestType":4,"data":"{\"TESTDATA\":8008}"}
 ```
 To understand all data format you can use or see the following java implementation to parse received json into their respective objects.
 You will always receive the json object `CustomRequest` class.
@@ -266,8 +264,6 @@ public class RemoteDataParser {
 
 ```	
 Usefull Constants here.
-
-
 
 ```java
 public class Constants {
