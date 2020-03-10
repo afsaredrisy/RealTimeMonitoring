@@ -115,6 +115,185 @@ To use ECG wave you will get a JSON object in following format which you can par
 
 }
 
+{"id":"556433","requestType":4,"data":"{\"TESTDATA\":8008}"}
+```
+To understand all data format you can use or see the following java implementation to parse received json into their respective objects.
+You will always receive the json object `CustomRequest` class.
+```java
+
+public class CustomRequest {
+	
+	private String id;
+	private int requestType;
+	private String data = "";
+	public CustomRequest(String id, int requestType) {
+		super();
+		this.id = id;
+		this.requestType = requestType;
+	}
+	public String getId() {
+		return id;
+	}
+	public void setId(String id) {
+		this.id = id;
+	}
+	public int getRequestType() {
+		return requestType;
+	}
+	public void setRequestType(int requestType) {
+		this.requestType = requestType;
+	}
+	public String getData() {
+		return data;
+	}
+	public void setData(String data) {
+		this.data = data;
+	}
+	@Override
+	public String toString() {
+		return "{id=" + id + ", requestType=" + requestType + ", data=" + data + "}";
+	}
+
+}
+
+```
+
+Here is parse.
+```java
+
+public class RemoteDataParser {
+    private DataParser.onPackageReceivedListener mListner;
+    public RemoteDataParser(DataParser.onPackageReceivedListener mListner){
+        this.mListner = mListner;
+    }
+    public void onDataReceived(JSONObject jsonObject){
+         parseJsonData(jsonObject);
+    }
+    private void parseJsonData(JSONObject json){
+        if(mListner == null){
+            return;
+        }
+        Set<String> keys = new HashSet<String>();
+        Iterator<String> iterator = json.keys();
+        while(iterator.hasNext()){
+            keys.add(iterator.next());
+        }
+        if(keys.contains(Constants.ECG)){
+            parseECGWaveFromJson(json,keys);
+        }
+        else if(keys.contains(Constants.SPO2_SIGNAL)){
+            parseSpO2WaveFromJson(json,keys);
+        }
+        else{
+            parseJsonData(json,keys);
+        }
+    }
+    private void parseJsonData(JSONObject json, Set<String> keys){
+            parseECGFromJson(json,keys);
+            parseNIBPFromJson(json,keys);
+            parseSpo2FromJson(json,keys);
+            parseTempratureFromJson(json,keys);
+    }
+    private void parseSpo2FromJson(JSONObject json, Set<String> keys){
+        try{
+            if(keys.contains(Constants.PULSE_RATE) && keys.contains(Constants.SPO2) ){
+               int pulseRate = json.getInt(Constants.PULSE_RATE);
+               int spo2v = json.getInt(Constants.SPO2);
+               SpO2 spO2 = new SpO2(spo2v,pulseRate,0);
+               mListner.onSpO2Received(spO2);
+            }
+            return;
+        }catch (Exception e){
+            e.printStackTrace();
+            return;
+        }
+    }
+    private void parseECGWaveFromJson(JSONObject json, Set<String> keys){
+        try{
+            if(keys.contains(Constants.ECG)){
+                mListner.onECGWaveReceived(json.getInt(Constants.ECG));
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+    private void parseECGFromJson(JSONObject json,Set<String> keys){
+        try{
+            if(keys.contains(Constants.HEART_RATE) && keys.contains(Constants.RESP_RATE)){
+
+                ECG ecg = new ECG(json.getInt(Constants.HEART_RATE),json.getInt(Constants.RESP_RATE),1);
+                mListner.onECGReceived(ecg);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+    private void parseTempratureFromJson(JSONObject json,Set<String> keys){
+        try{
+            if(keys.contains(Constants.TEMPRATURE)){
+                double temp = json.getDouble(Constants.TEMPRATURE);
+                Temp temprature = new Temp(temp,1);
+                mListner.onTempReceived(temprature);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+    private void parseNIBPFromJson(JSONObject json,Set<String> keys){
+        try {
+            if(keys.contains(Constants.SDP) && keys.contains(Constants.DBP)){
+                int highPressure = json.getInt(Constants.SDP);
+                int lowPressure = json.getInt(Constants.DBP);
+                int meanPressure = (int)(highPressure+lowPressure)/2;
+                NIBP nibp = new NIBP(highPressure,meanPressure,lowPressure,highPressure,1);
+                mListner.onNIBPReceived(nibp);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+    private void parseSpO2WaveFromJson(JSONObject json,Set<String> keys){
+        try{
+            if(keys.contains(Constants.SPO2_SIGNAL)){
+                   mListner.onSpO2WaveReceived(json.getInt(Constants.SPO2_SIGNAL));
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+}
+
+
+```	
+Usefull Constants here.
+
+
+
+```java
+public class Constants {
+	// TODO: Registry constants
+	public static final int REQUEST_REGISTER_RECEIVER = 0x13;
+	public static final int REQUEST_UNREGISTER_RECEIVER = 0x15;
+	public static final int DATA_TRANMISSION = 0004;
+	public static final String AGE = "age";
+	public static final String AGE = "age";
+    	public static final String HEIGHT = "height";
+   	public static final String WEIGHT = "weight";
+   	public static final String REMARK = "history";
+   	public static final String REGION = "region";
+   	public static final String GENDER  = "gender";
+    	public static final String PULSE_RATE = "pulse_rate";
+    	public static final String RESP_RATE = "resp_rate";
+    	public static final String HEART_RATE = "heart_rate";
+    	public static final String SDP= "sdp";
+    	public static final String DBP="dbp";
+    	public static final String TEMPRATURE = "temp";
+    	public static final String SPO2 = "spo2";
+    	public static final String SPO2_SIGNAL = "spo2_signal";
+    	public static final String ECG = "ecg";
+    	public static final String TIMESTAMP_LOGICAL = "logical_timestamp";
+    	public static final String TIMESTAMP_PHYSICAL = "physical_timestamp";    
+}
 
 ```
 
