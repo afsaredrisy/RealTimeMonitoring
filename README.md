@@ -88,7 +88,7 @@ var webSocket = new WebSocket("ws://52.15.210.116:8080/RealTimeMonitoring/auth/e
 
 
 ```
-
+For complete sample [click-here](WebContent/socket.html)
 
  
 
