@@ -5,7 +5,7 @@ We are using reactive approach for transmitting the real time sensors data from 
 a
 ##Client Usage
 
-# Get all Live clients
+# Get all Live Patients
 To get all live patient you need to make a HTTP-Post request to application server, Following are the details of provided API.
 
 Request Protocol :  HTTP2<br/>
@@ -16,7 +16,7 @@ Request Body: {} <br/>
 Response Content-Type: application/json<br/>
 Response Body : List of all live patient.<br/>
 **Response Body Sample**<br/>
-```
+```JSON
 {
     "timestamp": 1583855571041,
     "data": [
@@ -89,6 +89,34 @@ var webSocket = new WebSocket("ws://52.15.210.116:8080/RealTimeMonitoring/auth/e
 
 ```
 For complete sample [click-here](WebContent/socket.html)
+
+**Register to receive live data**
+
+To receive live sensors data installed on patient with `id` sends the following json data to server via connected socket connection.
+
+```
+{"id":"556433","requestType":19,"data":""}
+```
+Make sure to append correct id in json data, You can get id from list of live patients.
+
+**Receive & Parse realtime sensors data**
+
+Once your device has been register as receiver on a particular patient id then you will be continuously receiving the real time data in JSON format via connected socket connection. To understand the format of data you need here is one example.
+To use ECG wave you will get a JSON object in following format which you can parse & use in your application.
+```JSON
+{
+	"id":"556433",
+	"requestType":4
+	"data" : "{
+		"ecg": 98,
+		"logical_timestamp": 5345665256,
+		"physical_timestamp": "10 March 2019: 20:18:23"
+	}"
+
+}
+
+
+```
 
  
 
